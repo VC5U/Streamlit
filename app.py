@@ -22,6 +22,7 @@ tabs = st.tabs([
     "🎲 Ejercicio 2",
     "📊 Ejercicio 3",
     "⚙️ Ejercicio 4",
+    "🧩 Ejercicios Pandas",
     "📚 DataFrame de Estudiantes"
 ])
 
@@ -111,9 +112,9 @@ with tabs[3]:
         col2.write(f"**Vector normalizado:** {np.round(v_norm, 2)}")
 
 # ------------------------------
-# 📚 DATAFRAME DE ESTUDIANTES (Datos reales)
+# 📚 DATAFRAME DE ESTUDIANTES
 # ------------------------------
-with tabs[4]:
+with tabs[5]:
     st.header("📚 Tabla Interactiva de Estudiantes")
     st.write("Visualiza, filtra y descarga la información real de los estudiantes.")
 
@@ -176,6 +177,78 @@ with tabs[4]:
         file_name="estudiantes_filtrados.csv",
         mime="text/csv"
     )
+
+# ------------------------------
+# 🧩 EJERCICIOS DE PANDAS
+# ------------------------------
+with tabs[4]:
+    st.header("🧩 Ejercicios (Pandas)")
+
+    st.markdown("""
+    1️⃣ **Carga un CSV propio** (o exporta un DataFrame existente) y muestra sus primeras 10 filas.  
+    2️⃣ Calcula la **venta total por producto** y ordénala de mayor a menor.  
+    3️⃣ Identifica **valores faltantes** y aplica una estrategia de imputación.  
+    4️⃣ Construye una **tabla dinámica (pivot_table)** de ventas por mes y producto.  
+    5️⃣ Realiza un **merge** entre dos DataFrames (`productos` y `ventas`).
+    """)
+
+    st.markdown("---")
+
+    st.subheader("📂 1. Cargar CSV o usar DataFrame de ejemplo")
+    archivo = st.file_uploader("Sube tu archivo CSV", type=["csv"])
+    if archivo:
+        df = pd.read_csv(archivo)
+    else:
+        df = pd.DataFrame({
+            "Producto": ["A", "B", "C", "A", "B", "C"],
+            "Mes": ["Enero", "Enero", "Enero", "Febrero", "Febrero", "Febrero"],
+            "Ventas": [100, 150, 200, 130, 120, 210],
+            "Precio": [10, 15, 20, 10, 15, 20]
+        })
+        st.info("📄 No se cargó un archivo, se usa un DataFrame de ejemplo.")
+
+    st.dataframe(df.head(10))
+
+    # 2️⃣ Venta total por producto
+    st.subheader("💰 2. Venta total por producto")
+    total_producto = df.groupby("Producto")["Ventas"].sum().sort_values(ascending=False)
+    st.dataframe(total_producto)
+
+    # 3️⃣ Valores faltantes
+    st.subheader("🧮 3. Detección e imputación de valores faltantes")
+    st.write("Valores faltantes por columna:")
+    st.write(df.isna().sum())
+
+    if df.isna().any().any():
+        metodo = st.selectbox("Método de imputación:", ["Media", "Mediana", "Moda"])
+        if metodo == "Media":
+            df = df.fillna(df.mean(numeric_only=True))
+        elif metodo == "Mediana":
+            df = df.fillna(df.median(numeric_only=True))
+        else:
+            df = df.fillna(df.mode().iloc[0])
+        st.success("✅ Imputación completada.")
+        st.dataframe(df)
+
+    # 4️⃣ Pivot Table
+    st.subheader("📊 4. Tabla dinámica (ventas por mes y producto)")
+    try:
+        pivot = pd.pivot_table(df, values="Ventas", index="Mes", columns="Producto", aggfunc="sum")
+        st.dataframe(pivot)
+    except Exception as e:
+        st.warning("⚠️ No se pudo generar la tabla dinámica. Verifica las columnas 'Mes', 'Producto' y 'Ventas'.")
+
+    # 5️⃣ Merge entre DataFrames
+    st.subheader("🔗 5. Merge entre dos DataFrames")
+    productos = pd.DataFrame({
+        "Producto": ["A", "B", "C"],
+        "Categoria": ["Electrónica", "Ropa", "Juguetes"]
+    })
+    ventas = df[["Producto", "Ventas", "Mes"]]
+    merge_df = pd.merge(ventas, productos, on="Producto", how="left")
+    st.dataframe(merge_df)
+
+
 
 st.markdown("---")
 st.caption("💡 Desarrollado con Streamlit | NumPy | Pandas | Matplotlib")
