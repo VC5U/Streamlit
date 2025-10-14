@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Análisis con NumPy y Pandas", layout="wide")
 
 st.title("📊 Aplicación Interactiva: NumPy, Pandas y Streamlit")
+st.title("Realizado por: Adriana Valentina Cornejo Ulloa")
+
 st.write("Aplicación para análisis numérico y estadístico con Python, desarrollada en Streamlit.")
 
 # ---------------------------------
